@@ -17,6 +17,7 @@ THING_ID = os.environ['THING_ID']
 PROPERTY_ID = os.environ['PROPERTY_ID']
 DEVICE_ID = os.environ['DEVICE_ID']
 HELP_URL = "https://github.com/kennykim11/SiteToArduino"
+
 global properties_api
 
 def get_token():
@@ -46,6 +47,7 @@ def post_something():
         response_body = {"device_id": device_id, "value": value}
 
         try:
+            global properties_api
             resp = properties_api.properties_v2_publish(thing_id, property_id, response_body)
             print(resp)
         except ApiException as e:
