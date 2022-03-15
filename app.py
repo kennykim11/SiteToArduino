@@ -17,6 +17,7 @@ THING_ID = os.environ['THING_ID']
 PROPERTY_ID = os.environ['PROPERTY_ID']
 DEVICE_ID = os.environ['DEVICE_ID']
 HELP_URL = "https://github.com/kennykim11/SiteToArduino"
+properties_api = None
 
 def get_token():
     oauth_client = BackendApplicationClient(client_id=CLIENT_ID)
