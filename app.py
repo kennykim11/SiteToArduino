@@ -17,7 +17,7 @@ THING_ID = os.environ['THING_ID']
 PROPERTY_ID = os.environ['PROPERTY_ID']
 DEVICE_ID = os.environ['DEVICE_ID']
 HELP_URL = "https://github.com/kennykim11/SiteToArduino"
-properties_api = None
+global properties_api
 
 def get_token():
     oauth_client = BackendApplicationClient(client_id=CLIENT_ID)
@@ -60,7 +60,7 @@ def post_something():
             "ERROR": "No value given"
         })
 
-# A welcome message to test our server
+
 @app.route('/')
 def index():
     return f"""<h1>Look at the following docs for more information: {HELP_URL}"""
@@ -69,5 +69,6 @@ if __name__ == '__main__':
     client_config = Configuration(host="https://api2.arduino.cc/iot")
     client_config.access_token = get_token().get("access_token")
     client = iot.ApiClient(client_config)
+    global properties_api
     properties_api = iot.PropertiesV2Api(client)
     app.run(threaded=True, port=5000)
