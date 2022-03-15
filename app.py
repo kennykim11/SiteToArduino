@@ -18,8 +18,6 @@ PROPERTY_ID = os.environ['PROPERTY_ID']
 DEVICE_ID = os.environ['DEVICE_ID']
 HELP_URL = "https://github.com/kennykim11/SiteToArduino"
 
-global properties_api
-
 def get_token():
     oauth_client = BackendApplicationClient(client_id=CLIENT_ID)
     token_url = "https://api2.arduino.cc/iot/v1/clients/token"
@@ -36,7 +34,6 @@ def get_token():
 
 @app.route('/publish/', methods=['POST'])
 def post_something():
-    pprint(request)
     body = request.get_json()
     thing_id = body.get("thing_id") or THING_ID
     property_id = body.get("property_id") or PROPERTY_ID
@@ -47,9 +44,11 @@ def post_something():
         response_body = {"device_id": device_id, "value": value}
 
         try:
-            global properties_api
+            client_config = Configuration(host="https://api2.arduino.cc/iot")
+            client_config.access_token = get_token().get("access_token")
+            client = iot.ApiClient(client_config)
+            properties_api = iot.PropertiesV2Api(client)
             resp = properties_api.properties_v2_publish(thing_id, property_id, response_body)
-            print(resp)
         except ApiException as e:
             return jsonify({
                 "ERROR": f"Exception when calling PropertiesV2Api->propertiesV2Publish: {e}"
@@ -68,9 +67,4 @@ def index():
     return f"""<h1>Look at the following docs for more information: {HELP_URL}"""
 
 if __name__ == '__main__':
-    client_config = Configuration(host="https://api2.arduino.cc/iot")
-    client_config.access_token = get_token().get("access_token")
-    client = iot.ApiClient(client_config)
-    global properties_api
-    properties_api = iot.PropertiesV2Api(client)
     app.run(threaded=True, port=5000)
