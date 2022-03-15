@@ -1,5 +1,4 @@
 import os
-from pprint import pprint
 
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
@@ -9,7 +8,10 @@ from iot_api_client.rest import ApiException
 from iot_api_client.configuration import Configuration
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS, cross_origin
 app = Flask(__name__)
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 CLIENT_ID = os.environ['CLIENT_ID']
 CLIENT_SECRET = os.environ['CLIENT_SECRET']
@@ -33,6 +35,7 @@ def get_token():
     return token
 
 @app.route('/publish/', methods=['POST'])
+@cross_origin()
 def post_something():
     body = request.get_json()
     thing_id = body.get("thing_id") or THING_ID
@@ -63,6 +66,7 @@ def post_something():
 
 
 @app.route('/')
+@cross_origin()
 def index():
     return f"""<h1>Look at the following docs for more information: {HELP_URL}"""
 
