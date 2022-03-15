@@ -1,4 +1,5 @@
 import os
+from pprint import pprint
 
 from oauthlib.oauth2 import BackendApplicationClient
 from requests_oauthlib import OAuth2Session
@@ -35,7 +36,7 @@ def get_token():
 
 @app.route('/publish/', methods=['POST'])
 def post_something():
-    body = request.get_json()
+    body = request.get_json(force=True) # Forced because no-cors JS fetch request requires text Content-Type header
     thing_id = body.get("thing_id") or THING_ID
     property_id = body.get("property_id") or PROPERTY_ID
     device_id = body.get("device_id") or DEVICE_ID
