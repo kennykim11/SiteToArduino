@@ -34,7 +34,6 @@ def get_token():
     return token
 
 @app.route('/publish/', methods=['POST'])
-@cross_origin()
 def post_something():
     body = request.get_json()
     thing_id = body.get("thing_id") or THING_ID
