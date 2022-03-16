@@ -1,4 +1,6 @@
 import os
+from threading import Thread
+
 from pprint import pprint
 
 from oauthlib.oauth2 import BackendApplicationClient
@@ -7,6 +9,10 @@ from requests_oauthlib import OAuth2Session
 import iot_api_client as iot
 from iot_api_client.rest import ApiException
 from iot_api_client.configuration import Configuration
+
+import discord
+DISCORD_TOKEN = os.environ['DISCORD_TOKEN']
+DISCORD_CHANNELS = ['test', 'help']
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -68,6 +74,22 @@ app.store = []
 #             "ERROR": "No value given"
 #         })
 
+class DiscordClient(discord.Client):
+    async def on_ready(self):
+        print('Logged on as', self.user)
+
+    async def on_message(self, message):
+        # don't respond to ourselves
+        if message.author == self.user:
+            return
+
+        if message.channel.name in DISCORD_CHANNELS:
+            if message.content.startswith('!alert '):
+                text = message.content[7:]
+                app.store += [text]
+                print(text)
+
+
 @app.route('/push', methods=['POST'])
 def push_string():
     body = request.get_data()
@@ -89,4 +111,6 @@ def index():
     return f"""<h1>Look at the following docs for more information: {HELP_URL}"""
 
 if __name__ == '__main__':
-    app.run(port=5000)
+    client = DiscordClient()
+    Thread(target=lambda: app.run(port=5000)).start()
+    client.run(DISCORD_TOKEN)
