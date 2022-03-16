@@ -112,5 +112,5 @@ def index():
 
 if __name__ == '__main__':
     client = DiscordClient()
-    Thread(target=lambda: app.run(port=5000)).start()
+    #Thread(target=lambda: app.run(port=5000)).start()
     client.run(DISCORD_TOKEN)
