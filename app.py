@@ -20,48 +20,68 @@ PROPERTY_ID = os.environ['PROPERTY_ID']
 DEVICE_ID = os.environ['DEVICE_ID']
 HELP_URL = "https://github.com/kennykim11/SiteToArduino"
 
-def get_token():
-    oauth_client = BackendApplicationClient(client_id=CLIENT_ID)
-    token_url = "https://api2.arduino.cc/iot/v1/clients/token"
+app.store = []
 
-    oauth = OAuth2Session(client=oauth_client)
-    token = oauth.fetch_token(
-        token_url=token_url,
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        include_client_id=True,
-        audience="https://api2.arduino.cc/iot",
-    )
-    return token
+# def get_token():
+#     oauth_client = BackendApplicationClient(client_id=CLIENT_ID)
+#     token_url = "https://api2.arduino.cc/iot/v1/clients/token"
+#
+#     oauth = OAuth2Session(client=oauth_client)
+#     token = oauth.fetch_token(
+#         token_url=token_url,
+#         client_id=CLIENT_ID,
+#         client_secret=CLIENT_SECRET,
+#         include_client_id=True,
+#         audience="https://api2.arduino.cc/iot",
+#     )
+#     return token
+#
+# @app.route('/publish/', methods=['POST'])
+# def post_something():
+#     body = request.get_json(force=True) # Forced because no-cors JS fetch request requires text Content-Type header
+#     thing_id = body.get("thing_id") or THING_ID
+#     property_id = body.get("property_id") or PROPERTY_ID
+#     device_id = body.get("device_id") or DEVICE_ID
+#     value = body.get("value")
+#
+#     if value:
+#         response_body = {"device_id": "Nope", "value": value}
+#
+#         try:
+#             client_config = Configuration(host="https://api2.arduino.cc/iot")
+#             client_config.access_token = get_token().get("access_token")
+#             client = iot.ApiClient(client_config)
+#             properties_api = iot.PropertiesV2Api(client)
+#             devices_api = iot.DevicesV2Api(client)
+#             resp = properties_api.properties_v2_publish(thing_id, property_id, response_body)
+#         except ApiException as e:
+#             return jsonify({
+#                 "ERROR": f"Exception when calling PropertiesV2Api->propertiesV2Publish: {e}"
+#             })
+#         #resp = devices_api.devices_v2_update_properties(device_id, {"input": True, "properties": [{"name": "text", "type": "json", "value": value}]})
+#         print(resp)
+#         return jsonify({
+#             "SUCCESS": ""
+#         })
+#     else:
+#         return jsonify({
+#             "ERROR": "No value given"
+#         })
 
-@app.route('/publish/', methods=['POST'])
-def post_something():
-    body = request.get_json(force=True) # Forced because no-cors JS fetch request requires text Content-Type header
-    thing_id = body.get("thing_id") or THING_ID
-    property_id = body.get("property_id") or PROPERTY_ID
-    device_id = body.get("device_id") or DEVICE_ID
-    value = body.get("value")
-
-    if value:
-        response_body = {"device_id": device_id, "value": value}
-
-        try:
-            client_config = Configuration(host="https://api2.arduino.cc/iot")
-            client_config.access_token = get_token().get("access_token")
-            client = iot.ApiClient(client_config)
-            properties_api = iot.PropertiesV2Api(client)
-            resp = properties_api.properties_v2_publish(thing_id, property_id, response_body)
-        except ApiException as e:
-            return jsonify({
-                "ERROR": f"Exception when calling PropertiesV2Api->propertiesV2Publish: {e}"
-            })
-        return jsonify({
-            "SUCCESS": ""
-        })
+@app.route('/push', methods=['POST'])
+def push_string():
+    body = request.get_data()
+    if body:
+        app.store += [body]
+        return 'Success'
     else:
-        return jsonify({
-            "ERROR": "No value given"
-        })
+        return 'Fail'
+
+@app.route('/pop', methods=['GET'])
+def pop_string():
+    if app.store:
+        return app.store.pop(0)
+    return ''
 
 
 @app.route('/')
@@ -69,4 +89,4 @@ def index():
     return f"""<h1>Look at the following docs for more information: {HELP_URL}"""
 
 if __name__ == '__main__':
-    app.run(threaded=True, port=5000)
+    app.run(port=5000)
